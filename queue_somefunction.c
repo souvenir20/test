@@ -26,6 +26,17 @@ TreeNodePtr createTreeNode(int val, TreeNodePtr left, TreeNodePtr right) {  // ´
     return curr;
 }
 
+int max(int a,int b)
+{
+	if(a>b)
+	{
+		return a;
+	}
+	else
+	{
+		return b;
+	}
+}
 int Isempty(Queue *p)
 {
 	if(p->front == -1&& p->rear == -1)
@@ -145,6 +156,7 @@ void getDigits(char *buff, int *data) {
     }
 }
 
+
 TreeNodePtr createTreeWithLevelOrder(int *data, int size) {
     TreeNodePtr T,BT;
     Queue *Q=Init_queue();
@@ -213,6 +225,16 @@ void postOrderTraverse(TreeNodePtr root) {
 	printf("%d ",root->val);
 }
 
+int Maxpath(TreeNodePtr root) // ÕÒµ½×î´óÂ·¾¶ºÍ£» 
+{
+	if(root==NULL||root->val == -1)
+	{
+		return 0;
+	}
+	int left_sum = Maxpath(root->left);
+	int right_sum = Maxpath(root->right);
+	return max(left_sum,right_sum)+root->val;
+}
 void destoryTree(TreeNodePtr root) {   // ÇåÀírootËùÖ¸µÄÊ÷ 
     if (!root) return;
     if (root->left) {
@@ -225,26 +247,30 @@ void destoryTree(TreeNodePtr root) {   // ÇåÀírootËùÖ¸µÄÊ÷
     }
     free(root);
 }
-int maxPathSum(TreeNodePtr root)  // ÕÒµ½×î´óÂ·¾¶  º¯Êý 
+
+int sumofleftleave(TreeNodePtr root)   //ÕÒµ½×ó×ÓÒ¶µÄÈ¨ÖØÖ®ºÍ£¬µÝ¹é£» 
 {
-	if(!root||root->val == -1)
+	if(root==NULL||root->val ==-1)  
 	{
 		return 0;
 	}
-	if(root->left&&root->val!= -1)
+	int sum=0;
+	if(root->left&&root->left->val!=-1)
 	{
-		if(!root->left->left||root->left->left->val == -1)
+		if(!root->left->left&&!root->left->right)
 		{
-			if(!root->left->right||root->left->right->val == -1)
-			{
-				return root->left->val + maxPathSum(root->right);
-			}
-	    }
+			sum+=root->left->val;
+		}
+		else if(root->left->left->val==-1&&root->left->right->val==-1)
+		{
+			sum+=root->left->val;
+		}
+		else if(root->left->left->val ==-1&&!root->left->right)
+		{
+			sum+=root->left->val;
+		}
 	}
-	else
-	{
-		return maxPathSum(root->left) +  maxPathSum(root->right);
-	}
+	return sumofleftleave(root->right)+sumofleftleave(root->left)+sum;
 }
 
 TreeNodePtr invertTree(TreeNodePtr root)  // ·´×ªÁ´±í º¯Êý 
@@ -284,8 +310,9 @@ int main() {
 
         TreeNodePtr tree_root = createTreeWithLevelOrder(data, size);
 //        inOrderTraverse(tree_root);
-        int max_path_sum = maxPathSum(tree_root);
-        printf("%d", max_path_sum);
+        int left_leavesum = sumofleftleave(tree_root);
+      //  int max_path_sum = Maxpath(tree_root);
+        printf("%d", left_leavesum);
 
         destoryTree(tree_root);
         tree_root = NULL;
