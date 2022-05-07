@@ -4,7 +4,7 @@
 #define Maxsize 128
 
 typedef struct TreeNode {
-    int val;  // ¥Ê¥¢ ˝æ›µƒµÿ∑Ω
+    int val;  // Â≠òÂÇ®Êï∞ÊçÆÁöÑÂú∞Êñπ
     struct TreeNode *left;
     struct TreeNode *right;
 } TreeNode, *TreeNodePtr;
@@ -15,10 +15,10 @@ typedef struct
 {
 	int front;
 	int rear;
-	TreeNodePtr data[Maxsize];   // ◊Ó∫√ «≤…”√—≠ª∑ ˝◊È µƒ∑Ω Ω£¨≤ªª·¿À∑—ø’º‰£ª
+	TreeNodePtr data[Maxsize];   // ÊúÄÂ•ΩÊòØÈááÁî®Âæ™ÁéØÊï∞ÁªÑ ÁöÑÊñπÂºèÔºå‰∏ç‰ºöÊµ™Ë¥πÁ©∫Èó¥Ôºõ
 }Queue;
 
-TreeNodePtr createTreeNode(int val, TreeNodePtr left, TreeNodePtr right) {  // ¥¥Ω® ˜Ω⁄µ„£ª
+TreeNodePtr createTreeNode(int val, TreeNodePtr left, TreeNodePtr right) {  // ÂàõÂª∫Ê†ëËäÇÁÇπÔºõ
     TreeNodePtr curr = (TreeNodePtr) (malloc(sizeof(TreeNode)));
     curr->val = val;
     curr->left = left;
@@ -104,7 +104,7 @@ int Dequeue(Queue *p)
 {
 	if(Isempty(p))
 	{
-		return 0; // ±Ì…æ≥˝  ß∞‹£¨∑µªÿ0 ÷µ
+		return 0; // Ë°®Âà†Èô§ Â§±Ë¥•ÔºåËøîÂõû0 ÂÄº
 	}
 	else if(p->front == p->rear)
 	{
@@ -120,7 +120,7 @@ int Dequeue(Queue *p)
 
 int Enqueue(Queue *p,Datatype e)
 {
-	if((p->rear+1)%(Maxsize)==p->front)     // “™∂‘”¶–ﬁ∏ƒIsfull µƒ≈–∂œÃıº˛
+	if((p->rear+1)%(Maxsize)==p->front)     // Ë¶ÅÂØπÂ∫î‰øÆÊîπIsfull ÁöÑÂà§Êñ≠Êù°‰ª∂
 	{
 		return 0;
 	}
@@ -131,7 +131,7 @@ int Enqueue(Queue *p,Datatype e)
 	}
 	else
 	{
-		p->rear = (p->rear+1)%(Maxsize) ;// —≠ª∑∂”¡–£ø
+		p->rear = (p->rear+1)%(Maxsize) ;// Âæ™ÁéØÈòüÂàóÔºü
 	}
 	p->data[p->rear] = e;
 	return 1;
@@ -225,7 +225,7 @@ void postOrderTraverse(TreeNodePtr root) {
 	printf("%d ",root->val);
 }
 
-int Maxpath(TreeNodePtr root) // ’“µΩ◊Ó¥Û¬∑æ∂∫Õ£ª 
+int Maxpath(TreeNodePtr root) // ÊâæÂà∞ÊúÄÂ§ßË∑ØÂæÑÂíåÔºõ 
 {
 	if(root==NULL||root->val == -1)
 	{
@@ -235,7 +235,7 @@ int Maxpath(TreeNodePtr root) // ’“µΩ◊Ó¥Û¬∑æ∂∫Õ£ª
 	int right_sum = Maxpath(root->right);
 	return max(left_sum,right_sum)+root->val;
 }
-void destoryTree(TreeNodePtr root) {   // «Â¿ÌrootÀ˘÷∏µƒ ˜ 
+void destoryTree(TreeNodePtr root) {   // Ê∏ÖÁêÜrootÊâÄÊåáÁöÑÊ†ë 
     if (!root) return;
     if (root->left) {
         destoryTree(root->left);
@@ -248,7 +248,7 @@ void destoryTree(TreeNodePtr root) {   // «Â¿ÌrootÀ˘÷∏µƒ ˜
     free(root);
 }
 
-int sumofleftleave(TreeNodePtr root)   //’“µΩ◊Û◊”“∂µƒ»®÷ÿ÷Æ∫Õ£¨µ›πÈ£ª 
+int sumofleftleave(TreeNodePtr root)   //ÊâæÂà∞Â∑¶Â≠êÂè∂ÁöÑÊùÉÈáç‰πãÂíåÔºåÈÄíÂΩíÔºõ 
 {
 	if(root==NULL||root->val ==-1)  
 	{
@@ -273,7 +273,7 @@ int sumofleftleave(TreeNodePtr root)   //’“µΩ◊Û◊”“∂µƒ»®÷ÿ÷Æ∫Õ£¨µ›πÈ£ª
 	return sumofleftleave(root->right)+sumofleftleave(root->left)+sum;
 }
 
-TreeNodePtr invertTree(TreeNodePtr root)  // ∑¥◊™¡¥±Ì ∫Ø ˝ 
+TreeNodePtr invertTree(TreeNodePtr root)  // ÂèçËΩ¨ÈìæË°® ÂáΩÊï∞ 
 {
 	if(root==NULL||root->val==-1)
 	{
@@ -299,7 +299,7 @@ int main() {
         if (pos)
             *pos = '\0';
         
-        // Mac/Linux ÃÊªª\r
+        // Mac/Linux ÊõøÊç¢\r
         pos = strchr(buff, '\r');
         if (pos)
             *pos = '\0';
