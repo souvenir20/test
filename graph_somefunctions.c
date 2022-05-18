@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#define _CRT_SECURE_NO_WARNINGS
 
-#define max_dis 0
+#define max_dis 100000
 #define max_line 1000
 
 typedef char vextype[20];
@@ -25,9 +26,14 @@ int dijkstra(Graph g, int start, int end, int* path);
 void printPath(int d, int* diameter_path, Graph g);
 
 
+double clustering[20];
+
 typedef int boolean;
 boolean visit[max_line];  // ¶¨ÒåÒ»¸öÈ«¾Ö±êÖ¾Êı×é£¬ÓÃÀ´¼ÇÂ¼Í¼½áµã·ÃÎÊÇé¿ö£»
+boolean flag[max_line] = {0};   // ÓÃÀ´ÅĞ¶Ï µ±Ç°½áµãÔÚ SÖĞ»¹ÊÇÔÚ V-SÖĞ
+int flag2[max_line]; // ÓÃÀ´´æ´¢·ÃÎÊµ½¸ÃµãÇ°µÄÒ»¸ö½Úµã£» 
 
+ 
 /**
  * ´´½¨Ò»¸ö½ÚµãÊıÎªnµÄÍ¼
  * @param n ½Úµã¸öÊı
@@ -83,7 +89,7 @@ int Death_search(Graph g, int v_pos)  //Éî¶È±éÀúº¯Êı£»´«²ÎÎª Í¼ ÒÔ¼° ·ÃÎÊµÄ½áµãÎ
     visit[v_pos] = 1;   //·ÃÎÊµ½ v_pos Ê±£¬½«Æä visit ¶ÔÓ¦µÄ±êÖ¾ ¸ÄÎª 1£»
     for (i = 0; i < g.N; i++)
     {
-        if (visit[i] == 0 && g.matrix[i][v_pos] != 0)  // Ñ­»·£¬ÈôÓĞ Î´·ÃÎÊ½áµãÒÔ¼° ÆäÎªÁ¬Í¨ Ôò¿ÉÒÔ¶ÔÆä½øĞĞ·ÃÎÊ
+        if (visit[i] == 0 && g.matrix[i][v_pos] != 0 && g.matrix[i][v_pos] != max_dis)  // Ñ­»·£¬ÈôÓĞ Î´·ÃÎÊ½áµãÒÔ¼° ÆäÎªÁ¬Í¨ Ôò¿ÉÒÔ¶ÔÆä½øĞĞ·ÃÎÊ
         {
             Death_search(g, i); // µİ¹éÊ¹ÓÃ£¬ÍË³öÌõ¼ş¼´Îª ²»½øÈë if Óï¾ä£¬´ËÊ±ËùÓĞÄÜ·ÃÎÊµÄ½áµã¾ùÒÑ·ÃÎÊÍê±Ï
         }
@@ -91,7 +97,7 @@ int Death_search(Graph g, int v_pos)  //Éî¶È±éÀúº¯Êı£»´«²ÎÎª Í¼ ÒÔ¼° ·ÃÎÊµÄ½áµãÎ
 }
 
 
-
+// º¯Êı¹¦ÄÜ £º²éÑ¯Í¼ÊÇ·ñÎªÁ¬Í¨Í¼£» 
 int isConnected(Graph g) {
     int i = 0;
     int flag = 1; // ³õÊ¼Îª0£¬´ú±íÈ«¶¼·ÃÎÊ
@@ -121,7 +127,7 @@ void nodeDegree(Graph g, int* node_degree) {  // ±éÀúÁÚ½Ó¾ØÕó
         onenode_degree = 0;  // Ã¿´Î½øÈ¥ µÚ iĞĞ ¼ÇµÃ³õÊ¼»¯½ÚµãÊı£»
         for (j = 0; j < g.N; j++)  // É¨ÃèµÚi¸ö½áµã ÓĞÁ¬½ÓµÄµãÊı £¬²¢½«µãÊı·Å½øÊı×é node_degreeÖĞ£»
         {
-            if (g.matrix[i][j] != 0) // ÈôÁÚ½Ó¾ØÕóijÔªËØ²»Îª0£¬´ú±í´ËÊ±Á½¸ö½áµãÁ´½Ó£¬i½áµãÁ¬½ÓµÄ½ÚµãÊı¼Ó1£»
+            if (g.matrix[i][j] != 0 && g.matrix[i][j]!= max_dis) // ÈôÁÚ½Ó¾ØÕóijÔªËØ²»Îª0£¬´ú±í´ËÊ±Á½¸ö½áµãÁ´½Ó£¬i½áµãÁ¬½ÓµÄ½ÚµãÊı¼Ó1£»
             {
                 onenode_degree++;
             }
@@ -135,7 +141,61 @@ void nodeDegree(Graph g, int* node_degree) {  // ±éÀúÁÚ½Ó¾ØÕó
  * @param g Í¼
  * @return ·µ»Ø¾ÛÀàÏµÊı
  */
-double clusteringCoefficient(Graph g) {
+double clusteringCoefficient(Graph g) {  
+	int i=0;
+	int j=0;
+	int y=0;
+	int z=0;
+	int i_array[20]={0}; // ¼ÇÂ¼Óëi ½áµãÏàÁ¬½ÓµÄÄÇĞ©½áµã£» 
+	double clustering_num = 0;
+	double i_close_edge_num = 0;
+	for(i=0;i<g.N;i++)
+	{
+		int k = 0;
+		double i_connum=0; // ¼ÇÂ¼Óëi½áµãÁ¬½ÓµÄ½Úµã¸öÊı£» 
+		double max_connected = 0;  // ÓÃÀ´¼ÇÂ¼ ½áµã i µÄÁ´½ÓµÄ×î´ó ²úÉúµÄ Á¬½ÓÊı 
+		i_close_edge_num = 0;
+		for(j=0;j<g.N;j++)
+		{
+			if(g.matrix[i][j]!=0&&g.matrix[i][j]!=max_dis)
+			{
+				i_connum ++;
+				i_array[k] = j; // ½«ÏÂ±ê´æ·ÅÔÚÊı×é i_ array ÖĞ£» 
+				k++;
+			}
+		}
+		for(z=0;z<k;z++)
+		{
+			for(y=0;y<k;y++)
+			{
+				if(g.matrix[i_array[z]][i_array[y]]!=0&&g.matrix[i_array[z]][i_array[y]]!=max_dis)    
+				{
+					i_close_edge_num ++;   // µÃµ½Óë i Á´½Ó µÄ ½áµãµÄÁ¬½Ó±ßÊı£»£¨¼ÇµÃ³ıÒÔ2£© 
+				}
+			}
+		}
+		if(i_connum!=0)    
+		{
+			if(i_close_edge_num!=0)
+			{
+				max_connected = (i_connum)*(i_connum-1)/2;
+			    clustering[i] = (i_close_edge_num/2) / max_connected;
+			} 
+			else
+			{
+				clustering[i]= 0;
+			}
+		}
+		else // ÌØÊâÇé¿ö´¦Àí1 £º ½áµãÕÒ²»µ½Á´½Óµã 
+		{
+			clustering[i] = 0;
+		}
+	}
+    for(i=0;i<g.N;i++)
+    {
+    	clustering_num+=clustering[i]; //µÃµ½È«²¿¾ÛÀàÏµÊıµÄºÍ£» 
+	}
+	return clustering_num / (g.N);  // ·µ»ØÆ½¾ùÖµ£» 
     //TODO
 }
 
@@ -147,10 +207,73 @@ double clusteringCoefficient(Graph g) {
  * @param path ´Óstartµ½endµÄÂ·¾¶, [start,...,end]
  * @return Â·¾¶³¤¶È
  */
-int dijkstra(Graph g, int start, int end, int* path)
+int dijkstra(Graph g, int start, int end, int* path) // g , start´ú±í dist Êı×é´æ´¢ µÄÏà¹Ø×î¶ÌÂ·¾¶ ×îºó·µ»ØµÄÊÇ dist [end]  £¬ path´ú±íµÄ 
 {
+	int j=0;
+	int i=0;
+	int k=0; 
+	int temp;
+	int dist[max_line];
+	int oppo_path[max_line];
+	for(i=0;i<g.N;i++)
+	{
+		dist[i] = g.matrix[start][i] ;
+		flag[i] = 0 ;
+		if(g.matrix[start][i]!=max_dis&&g.matrix[start][i]!=0)
+		{
+			flag2[i] = start;
+		}
+		else
+		{
+			flag2[i] = -1;
+		}
+	}
+	flag[start] = 1;  // ´ËÊ±½«start ·Å½øS¼¯ºÏÖĞ£¬´ú±í´ËÊ±ÄÄĞ©½ÚµãµÄdistÒÑ¾­¿ÉÒÔ¹Ì¶¨£¬ÕÒµ½ÁË×îĞ¡Öµ£» 
+	for(i=0;i<g.N;i++)
+	{
+		int temp = max_dis;
+		int min_node = start; 
+		for(j=0;j<g.N;j++)   // ÓÃÀ´Ñ°ÕÒÔÚ V-S¼¯ºÏÖĞ dist Öµ×îĞ¡µÄÄÇ¸ö½áµã 
+		{
+			if(flag[j]==0 && dist[j]<temp)
+			{
+				min_node = j;
+				temp = dist[j];
+			}
+		}
+//		if(min_node == start)   // Ã»ÕÒµ½¶ÔÓ¦µÄ×îĞ¡¾àÀëµÄ½áµã 
+//		{
+//			return ;
+//		} 
+		flag[min_node] = 1;
+		for(j=0;j<g.N;j++)
+		{
+			if(flag[j]== 0 && g.matrix[min_node][j]<max_dis)
+			{//£¡flag[j]±íÊ¾jÔÚv-s¼¯ºÏÖĞ£¬map[t][j]<INF±íÊ¾tÓëjÁÚ½Ó
+				if(dist[j]>(dist[min_node]+g.matrix[min_node][j])){//¾­¹ıtµ½´ïjµÄÂ·¾¶¸ü¶Ì
+					dist[j]=dist[min_node]+g.matrix[min_node][j];
+					flag2[j]=min_node;	//¼ÇÂ¼jµÄÇ°ÇıÎªt
+				}  
+			}
+	    }
+	}
+	    k=0;
+		temp = flag2[end];
+		i=0;
+		while(temp != -1)
+		{
+			oppo_path[i++] = temp;
+		    temp = flag2[temp];
+		}
+		for(i=i-1;i>=0;i--)
+		{
+			path[k++] = oppo_path[i];
+		}
+		path[k] = end;
+	return dist[end];
     //TODO
 }
+
 
 /**
  * ¼ÆËãÍ¼µÄÖ±¾¶¡£ÌáÊ¾£ºFloydËã·¨
@@ -158,8 +281,37 @@ int dijkstra(Graph g, int start, int end, int* path)
  * @return Ö±¾¶µÄ³¤¶È
  */
 int Diameter(Graph g) {
+	int k=0;
+	int i=0;
+	int j=0;
+    int temp = g.matrix[0][0];
+	for(k=0;k<g.N;k++)  // ÈıÖØÑ­»·£¬½«Í¼µÄ¾ØÕó ×ª±ä³É ÈÎÒâÁ½¸ö½ÚµãµÄ¾àÀë £¨×î¶Ì£©£» 
+	{
+        for(i=0;i<g.N;i++)
+         {
+         	for(j=0;j<g.N;j++)
+         	{
+         		if(g.matrix[i][j]>g.matrix[i][k]+g.matrix[k][j])
+         		{
+         			g.matrix[i][j] = g.matrix[i][k] + g.matrix[k][j];
+				}
+			}
+		 }
+	} 
+	for(i=0;i<g.N;i++) //ÕÒµ½ floyd ¾ØÕóÖĞµÄ×î´óÖµ ¼´ÎªÖ±¾¶£» 
+	{
+		for(j=0;j<g.N;j++)
+		{
+			if(temp<g.matrix[i][j])
+			{
+				temp = g.matrix[i][j];
+			}
+		}
+	}
+	return temp;
     //TODO
 }
+
 
 
 /**
@@ -168,6 +320,47 @@ int Diameter(Graph g) {
  * @return °ë¾¶³¤¶È
  */
 int Radius(Graph g) {
+	int k=0;
+	int i=0;
+	int j=0;
+	int radius = 0;
+	int *eccentricity = (int*)malloc(sizeof(int)*g.N);
+    int temp = g.matrix[0][0];
+	for(k=0;k<g.N;k++)
+	{
+        for(i=0;i<g.N;i++)
+         {
+         	for(j=0;j<g.N;j++)
+         	{
+         		if(g.matrix[i][j]>g.matrix[i][k]+g.matrix[k][j])
+         		{
+         			g.matrix[i][j] = g.matrix[i][k] + g.matrix[k][j];  // µÃµ½Ò»¸öfloyd ¾ØÕó£¬´æ·ÅµÄ¶¼ÊÇ 
+				}
+			}
+		 }
+	} 
+	for(i=0;i<g.N;i++) //ÕÒµ½ floyd ¾ØÕóÖĞµÄ×î´óÖµ ¼´ÎªÖ±¾¶£» 
+	{
+		temp = g.matrix[i][0];
+		for(j=0;j<g.N;j++)  // ÕÒµ½ÕâÒ»ĞĞµÄ×î´óÖµ 
+		{
+			if(temp<g.matrix[i][j])
+			{
+				temp = g.matrix[i][j];
+			}
+		}
+		eccentricity[i] = temp ;
+	}
+	radius = eccentricity[0];
+	for(i=0;i<g.N;i++)
+	{
+		if(radius>eccentricity[i])
+		{
+			radius = eccentricity[i];
+		}
+	}
+	free(eccentricity);
+	return radius;
     //TODO
 }
 
@@ -175,27 +368,52 @@ int Radius(Graph g) {
 int main() {
     int node_num;
     int edge_num;
+    int i = 0; 
     scanf("%d %d\n", &node_num, &edge_num);
     int start_idx, end_idx, weight;
     Graph g = createGraph(node_num);
-    for (int i = 0; i < node_num; i++) {
+    for (i = 0; i < node_num; i++) {
         sprintf(g.vertex[i], "%d", i);
     }
-    for (int i = 0; i < edge_num; i++) {
+    for (i = 0; i < edge_num; i++) {
         scanf("%d %d %d", &start_idx, &end_idx, &weight);
         g.matrix[start_idx][end_idx] = weight;
         g.matrix[end_idx][start_idx] = weight;
     }
-
     printf("connected: %d\n", isConnected(g));
-
-    int* degree = (int*)malloc(sizeof(int) * g.N);
-    nodeDegree(g, degree);
-    printf("degree distribution:\n");
-    for (int i = 0; i < g.N; i++)
+    
+//	if(isConnected(g))
+//    {
+//        int d = Diameter(g);
+//        printf("diameter:%d\n", d);
+//
+//        int r = Radius(g);
+//        printf("radius:%d", r);
+//    }
+//    return 0;
+	
+		
+    if(isConnected(g))
     {
-        printf("node%s:%d ", g.vertex[i], degree[i]);
+        int *short_path = (int *)malloc(sizeof(int) * g.N);
+        int dis = dijkstra(g, 1, 3, short_path);
+        printf("the shortest path between 1 and 3: %d\n", dis);
+        printPath(dis, short_path, g);
+        free(short_path);
     }
-    free(degree);
     return 0;
+
+
+//    double c = clusteringCoefficient(g);
+//    printf("clustering coefficient:%f", c);
+//    printf("connected: %d\n", isConnected(g));
+//    int* degree = (int*)malloc(sizeof(int) * g.N);
+//    nodeDegree(g, degree);
+//    printf("degree distribution:\n");
+//    for (i = 0; i < g.N; i++)
+//    {
+//        printf("node%s:%d ", g.vertex[i], degree[i]);
+//    }
+//    free(degree);
+//    return 0;
 }
